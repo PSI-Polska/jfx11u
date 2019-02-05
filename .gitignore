@@ -7,6 +7,7 @@ bin/
 build/
 dist/
 gradle.properties
+release.properties
 testbin/
 **/Ensemble8/lib/
 **/Ensemble8/src/generated/resources/ensemble/search/index/write.lock

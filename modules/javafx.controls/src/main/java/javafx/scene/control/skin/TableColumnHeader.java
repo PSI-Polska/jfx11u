@@ -493,7 +493,7 @@ public class TableColumnHeader extends Region {
      * @return the {@code TableViewSkinBase} in which this {@code TableColumnHeader} is inserted, or {@code null}
      * @since 12
      */
-    protected TableViewSkinBase<?, ?, ?, ?, ?> getTableSkin() {
+    protected final TableViewSkinBase<?,?,?,?,?> getTableSkin() {
         return tableHeaderRow == null ? null : tableHeaderRow.tableSkin;
     }
 
