@@ -349,12 +349,6 @@ public class TableHeaderRow extends StackPane {
 
 
 
-    /***************************************************************************
-     *                                                                         *
-     * Public API                                                              *
-     *                                                                         *
-     **************************************************************************/
-
     /** {@inheritDoc} */
     @Override protected void layoutChildren() {
         double x = scrollX;
@@ -383,6 +377,17 @@ public class TableHeaderRow extends StackPane {
 
         // position the top-right rectangle (which sits above the scrollbar)
         cornerRegion.resizeRelocate(tableWidth - cornerWidth, snappedTopInset(), cornerWidth, prefHeight);
+    }
+
+    /***************************************************************************
+     *                                                                         *
+     * Public API                                                              *
+     *                                                                         *
+     **************************************************************************/
+
+    protected final StackPane getDragHeader()
+    {
+        return dragHeader;
     }
 
     /** {@inheritDoc} */

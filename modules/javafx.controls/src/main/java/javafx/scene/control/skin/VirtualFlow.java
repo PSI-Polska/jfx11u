@@ -1790,6 +1790,11 @@ public class VirtualFlow<T extends IndexedCell> extends Region {
         return vbar;
     }
 
+    protected final ClippedContainer getClipView()
+    {
+        return clipView;
+    }
+
     /**
      * The maximum preferred size in the non-virtual direction. For example,
      * if vertical, then this is the max pref width of all cells encountered.
@@ -2882,7 +2887,7 @@ public class VirtualFlow<T extends IndexedCell> extends Region {
      * A simple extension to Region that ensures that anything wanting to flow
      * outside of the bounds of the Region is clipped.
      */
-    static class ClippedContainer extends Region {
+    protected static class ClippedContainer extends Region {
 
         /**
          * The Node which is embedded within this {@code ClipView}.
