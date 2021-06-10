@@ -3015,6 +3015,11 @@ private double adjustByPixelAmount(double numPixels) {
     }
 
     private void recalculateAndImproveEstimatedSize(int improve) {
+        final Callback<VirtualFlow<T>,T> currentCellFactory = getCellFactory();
+        if (currentCellFactory == null) {
+            return;
+        }
+
         int itemCount = getCellCount();
         int cacheCount = itemSizeCache.size();
         int added = 0;
