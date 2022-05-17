@@ -109,7 +109,7 @@ public class VirtualFlow<T extends IndexedCell> extends Region {
     private static final String NEW_CELL = "newcell";
 
     private static final double GOLDEN_RATIO_MULTIPLIER = 0.618033987;
-    
+
     /**
      * The default improvement for the estimation of the total size. A value
      * of x means that every time we need to estimate the size, we will add
@@ -897,8 +897,8 @@ public class VirtualFlow<T extends IndexedCell> extends Region {
     public final int getCellCount() { return cellCount.get(); }
     public final void setCellCount(int value) {
         resetSizeEstimates();
+        populateCellSizes( value );
         cellCount.set(value);
-        populateCellSizes();
         adjustAbsoluteOffset();
     }
     public final IntegerProperty cellCountProperty() { return cellCount; }
@@ -1629,7 +1629,7 @@ public class VirtualFlow<T extends IndexedCell> extends Region {
         double pos = getPosition();
         if (pos == 0.0f && delta < 0) return 0;
         if (pos == 1.0f && delta > 0) return 0;
-        recalculateEstimatedSize(); 
+        recalculateEstimatedSize();
         double answer = adjustByPixelAmount(delta);
         if (pos == getPosition()) {
             // The pos hasn't changed, there's nothing to do. This is likely
@@ -2839,16 +2839,16 @@ public class VirtualFlow<T extends IndexedCell> extends Region {
         double p = com.sun.javafx.util.Utils.clamp(0, position, 1);
         double bound = 0d;
         double estSize = estimatedSize/getCellCount();
-        
+
         for (int i = 0; i < getCellCount(); i++) {
             double h = getCellSize(i);
-            if (h < 0) h = estSize; 
+            if (h < 0) h = estSize;
             if (bound +h > absoluteOffset) {
                 return absoluteOffset-bound;
             }
             bound += h;
         }
-        return 0d; 
+        return 0d;
     }
 
     private void adjustPositionToIndex(int index) {
@@ -3062,15 +3062,17 @@ private double adjustByPixelAmount(double numPixels) {
 //    }
     // end of old PositionMapper code
 
-
     private void populateCellSizes() {
+        populateCellSizes( getCellCount() );
+    }
+
+    private void populateCellSizes( final int cellCount ) {
         final CellSizeProvider cellSizeProvider =
             fixedCellSizeEnabled ? new FixedCellSizeProvider( getFixedCellSize() ) : this.cellSizeProvider;
         if( cellSizeProvider == null ) {
             return;
         }
         itemSizeCache.clear();
-        final int cellCount = getCellCount();
         for( int i = 0; i < cellCount; i++ ) {
             itemSizeCache.add( cellSizeProvider.getCellSize( i ) );
         }
@@ -3285,7 +3287,7 @@ private double adjustByPixelAmount(double numPixels) {
         }
 
         public void addLast(T cell) {
-            
+
             // if lastIndex == -1 then that means this is the first item in the
             // list and we need to initialize the firstIndex and lastIndex
             if (firstIndex == -1) {
