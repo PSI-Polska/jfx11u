@@ -25,14 +25,11 @@
 
 package javafx.scene.control.skin;
 
-import com.sun.javafx.scene.control.skin.Utils;
-import javafx.beans.property.ObjectProperty;
 import javafx.collections.WeakListChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -163,7 +160,11 @@ public class NestedTableColumnHeader extends TableColumnHeader {
         if (me.getClickCount() == 2 && me.isPrimaryButtonDown()) {
             // the user wants to resize the column such that its
             // width is equal to the widest element in the column
-            TableSkinUtils.resizeColumnToFitContent(header.getTableSkin(), column, -1);
+            TableHeaderRow tableHeader = header.getTableHeaderRow();
+            TableColumnHeader columnHeader = tableHeader.getColumnHeaderFor(column);
+            if (columnHeader != null) {
+                columnHeader.resizeColumnToFitContent(-1);
+            }
         } else {
             // rather than refer to the rect variable, we just grab
             // it from the source to prevent a small memory leak.

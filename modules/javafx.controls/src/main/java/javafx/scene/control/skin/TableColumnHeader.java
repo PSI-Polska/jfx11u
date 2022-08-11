@@ -64,6 +64,9 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumnBase;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableView;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
@@ -544,7 +547,7 @@ public class TableColumnHeader extends Region {
             if (getTableColumn() == null || getTableColumn().getWidth() != DEFAULT_COLUMN_WIDTH || getScene() == null) {
                 return;
             }
-            doColumnAutoSize(getTableColumn(), n);
+            doColumnAutoSize(n);
             autoSizeComplete = true;
         }
     }
@@ -596,13 +599,37 @@ public class TableColumnHeader extends Region {
         }
     }
 
-    private void doColumnAutoSize(TableColumnBase<?,?> column, int cellsToMeasure) {
-        double prefWidth = column.getPrefWidth();
+    private void doColumnAutoSize(int cellsToMeasure) {
+        double prefWidth = getTableColumn().getPrefWidth();
 
         // if the prefWidth has been set, we do _not_ autosize columns
         if (prefWidth == DEFAULT_COLUMN_WIDTH) {
-            TableSkinUtils.resizeColumnToFitContent(getTableSkin(), column, cellsToMeasure);
-//            getTableViewSkin().resizeColumnToFitContent(column, cellsToMeasure);
+            resizeColumnToFitContent(cellsToMeasure);
+        }
+    }
+
+    /**
+     * Resizes this {@code TableColumnHeader}'s column to fit the width of its content.
+     *
+     * @implSpec The resulting column width for this implementation is the maximum of the preferred width of the header
+     * cell and the preferred width of the first {@code maxRow} cells.
+     * <p>
+     * Subclasses can either use this method or override it (without the need to call {@code super()}) to provide their
+     * custom implementation (such as ones that exclude the header, exclude {@code null} content, compute the minimum
+     * width, etc.).
+     *
+     * @param maxRows the number of rows considered when resizing. If -1 is given, all rows are considered.
+     * @since 14
+     */
+    protected void resizeColumnToFitContent(int maxRows) {
+        TableColumnBase<?, ?> tc = getTableColumn();
+        if (!tc.isResizable()) return;
+
+        Object control = this.getTableSkin().getSkinnable();
+        if (control instanceof TableView ) {
+            TableSkinUtils.resizeColumnToFitContent((TableView) control, (TableColumn) tc, this.getTableSkin(), maxRows);
+        } else if (control instanceof TreeTableView ) {
+            TableSkinUtils.resizeColumnToFitContent((TreeTableView) control, (TreeTableColumn) tc, this.getTableSkin(), maxRows);
         }
     }
 
