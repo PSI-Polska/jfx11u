@@ -1581,17 +1581,11 @@ void addMavenPublication(Project project, List<String> projectDependencies) {
                 javafx(MavenPublication) {
                     artifactId = 'javafx'
                     artifacts = []
-//                    artifacts = {
-//                        artifact sourceJar {
-//                            classifier "sources"
-//                        }
-//                    }
                 }
             }
         }
     }
 
-    // generates master parent pom.xml
     gradle.taskGraph.whenReady { g ->
         project.tasks.findAll { it.name == 'generatePomFileForJavafxPublication'}.each { it ->
             it.doLast {
@@ -4324,6 +4318,7 @@ allprojects {
     // javac API is lacking support for it. So what we'll do is find any Compile
     // task and manually provide the options necessary to fire up the
     // compiler with the right settings.
+
     tasks.withType(JavaCompile) { compile ->
         if (compile.options.hasProperty("useAnt")) {
             compile.options.useAnt = true
@@ -4700,7 +4695,7 @@ compileTargets { t ->
 }
 
 project(":apps") {
-    if( true )
+        if( true )
     {
         return;
     }
@@ -5012,7 +5007,7 @@ compileTargets { t ->
     }
     buildModules.dependsOn(buildModulesTask)
 
-    // prepare sources
+// prepare sources
     moduleProjList.each { project ->
         def buildDir = project.buildDir
         def sourcesDir = "${buildDir}/${platformPrefix}module-sources"
@@ -5767,12 +5762,6 @@ compileTargets { t ->
         def standaloneSdkDir = "${rootProject.buildDir}/${standaloneSdkDirName}"
         def standaloneLegalDir = "${standaloneSdkDir}/legal"
 
-        def excludeNativeLibs = []
-        if (IS_WINDOWS) {
-            // List of duplicate Microsoft DLLs to exclude
-            excludeNativeLibs += targetProperties.VS2017DLLNames
-            excludeNativeLibs += targetProperties.WinSDKDLLNames
-        }
 
         moduleProjList.each { project ->
             def moduleName = project.ext.moduleName
@@ -5782,9 +5771,36 @@ compileTargets { t ->
             def srcLibDir = "${buildDir}/${platformPrefix}module-lib"
             def srcLegalDir = "${standaloneLegalDir}/${moduleName}"
 
+            def jmodLibDir = srcLibDir
+            if (IS_WINDOWS) {
+                jmodLibDir = "${srcLibDir}-jmod"
+            }
+
             def jmodName = "${moduleName}.jmod"
             def jmodFile = "${jmodsDir}/${jmodName}"
-            def jmodTask = project.task("jmod$t.capital", group: "Build", dependsOn: sdk) {
+
+            // On Windows, copy the native libraries in the jmod image
+            // to a "javafx" subdir to avoid conflicting with the Microsoft
+            // DLLs that are shipped with the JDK
+            def jmodCopyLibTask = project.task("jmodCopyLib$t.capital", type: Copy, dependsOn: sdk) {
+                enabled = IS_WINDOWS
+
+                group = "Basic"
+                description = "copied Windows DLLs into javafx subdir for jmods"
+
+                into jmodLibDir
+
+                from (srcLibDir) {
+                    exclude("*.dll")
+                }
+
+                from (srcLibDir) {
+                    include("*.dll")
+                    into("javafx")
+                }
+            }
+
+            def jmodTask = project.task("jmod$t.capital", group: "Build", dependsOn: [sdk, jmodCopyLibTask]) {
                 doLast {
                     mkdir jmodsDir
                     delete(jmodFile);
@@ -5794,16 +5810,9 @@ compileTargets { t ->
                         args("--class-path")
                         args(srcClassesDir)
                         // Not all modules have a "lib" dir
-                        if (file(srcLibDir).isDirectory()) {
+                        if (file(jmodLibDir).isDirectory()) {
                             args("--libs")
-                            args(srcLibDir)
-                        }
-                        // Exclude duplicate native libs from javafx.graphics.jmod
-                        if (moduleName == "javafx.graphics") {
-                            excludeNativeLibs.each { name ->
-                                args("--exclude")
-                                args(name)
-                            }
+                            args(jmodLibDir)
                         }
                         args("--legal-notices")
                         args(srcLegalDir)
