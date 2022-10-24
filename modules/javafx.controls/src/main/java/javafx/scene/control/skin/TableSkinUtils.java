@@ -219,15 +219,15 @@ class TableSkinUtils {
     {
         List<?> items = new TreeTableViewBackingList( ttv );
         if (items == null || items.isEmpty())
-            return null;
+            return -1.0;
 
         Callback cellFactory = tc.getCellFactory();
         if (cellFactory == null)
-            return null;
+            return -1.0;
 
         TreeTableCell<T,S> cell = (TreeTableCell) cellFactory.call( tc );
         if (cell == null)
-            return null;
+            return -1.0;
 
         // set this property to tell the TableCell we want to know its actual
         // preferred width, not the width of the associated TableColumnBase
